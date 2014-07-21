@@ -66,7 +66,7 @@
     self.lastMatchResultLabel.text = [self generateResultText];
 }
 
-- (NSString *)cardContentsAsString:(NSMutableArray *)cards {
+- (NSString *)cardContentsAsString:(NSArray *)cards {
     NSString *resultString = [[NSString alloc] init];
     for (Card *card in cards) {
         resultString = [resultString stringByAppendingString:[NSString stringWithFormat:@"%@ ", card.contents]];
@@ -75,14 +75,14 @@
 }
 
 - (NSString *)generateResultText {
-    NSMutableArray *chosenCards = self.game.previouslyChosenCards;
+    NSArray *chosenCards = self.game.previouslyChosenCards;
     if ([chosenCards count] == self.game.matchCount) {
         // A matching event occured, display the results
-        int pointValue = [[chosenCards firstObject] match:[chosenCards objectsAtIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(1, [chosenCards count] - 1)]]];
+        int pointValue = self.game.lastScore;
         if (pointValue > 0) {
-            return [NSString stringWithFormat:@"Matched %@ for %d %@!", [self cardContentsAsString:self.game.previouslyChosenCards], pointValue * [CardMatchingGame matchBonus], pointValue * [CardMatchingGame matchBonus] == 1 ? @"point" : @"points"];
+            return [NSString stringWithFormat:@"Matched %@for %d %@!", [self cardContentsAsString:self.game.previouslyChosenCards], pointValue, pointValue == 1 ? @"point" : @"points"];
         } else {
-            return [NSString stringWithFormat:@"%@ don't match!%d point penalty!", [self cardContentsAsString:self.game.previouslyChosenCards], [CardMatchingGame mismatchPenalty]];
+            return [NSString stringWithFormat:@"%@don't match! %d point penalty!", [self cardContentsAsString:self.game.previouslyChosenCards], pointValue];
         }
     } else {
         // No matching event occured, simply display the currently selected cards
