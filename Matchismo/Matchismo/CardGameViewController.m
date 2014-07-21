@@ -7,7 +7,6 @@
 //
 
 #import "CardGameViewController.h"
-#import "Model/PlayingCardDeck.h"
 #import "Model/CardMatchingGame.h"
 
 @interface CardGameViewController ()
@@ -15,40 +14,34 @@
 @property (strong, nonatomic) CardMatchingGame *game;
 @property (weak, nonatomic) IBOutlet UILabel *scoreLabel;
 @property (weak, nonatomic) IBOutlet UILabel *lastMatchResultLabel;
-@property (weak, nonatomic) IBOutlet UISegmentedControl *matchModeSegment;
 @property (strong, nonatomic) IBOutletCollection(UIButton) NSArray *cardButtons;
 @end
 
 @implementation CardGameViewController
 
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    [self updateUI];
+}
+
 - (CardMatchingGame *)game {
     if (!_game) _game = [[CardMatchingGame alloc] initWithCardCount:[self.cardButtons count]
                                                           usingDeck:[self createDeck]];
+    _game.matchCount = self.matchCount;
     return _game;
 }
 
+// abstract
 - (Deck *)createDeck {
-    return [[PlayingCardDeck alloc] init];
-}
-
-- (void) updateGameMatchCount {
-    self.game.matchCount = self.matchModeSegment.selectedSegmentIndex + 2;
-}
-
-- (IBAction)matchModeChanged:(UISegmentedControl *)sender {
-    [self updateGameMatchCount];
+    return nil;
 }
 
 - (IBAction)startNewGame:(UIButton *)sender {
-    self.matchModeSegment.enabled = YES;
     self.game = nil;
-    [self updateGameMatchCount];
     [self updateUI];
 }
 
 - (IBAction)touchCardButton:(UIButton *)sender {
-    // Since the game has 'started', disable the match mode control
-    self.matchModeSegment.enabled = NO;
     int cardIndex = [self.cardButtons indexOfObject:sender];
     [self.game chooseCardAtIndex:cardIndex];
     [self updateUI];
@@ -80,9 +73,9 @@
         // A matching event occured, display the results
         int pointValue = [[chosenCards firstObject] match:[chosenCards objectsAtIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(1, [chosenCards count] - 1)]]];
         if (pointValue > 0) {
-            return [NSString stringWithFormat:@"Matched %@ for %d %@!", [self cardContentsAsString:self.game.previouslyChosenCards], pointValue * [CardMatchingGame matchBonus], pointValue * [CardMatchingGame matchBonus] == 1 ? @"point" : @"points"];
+            return [NSString stringWithFormat:@"Matched %@for %d %@!", [self cardContentsAsString:self.game.previouslyChosenCards], pointValue * [CardMatchingGame matchBonus], pointValue * [CardMatchingGame matchBonus] == 1 ? @"point" : @"points"];
         } else {
-            return [NSString stringWithFormat:@"%@ don't match!%d point penalty!", [self cardContentsAsString:self.game.previouslyChosenCards], [CardMatchingGame mismatchPenalty]];
+            return [NSString stringWithFormat:@"%@don't match! %d point penalty!", [self cardContentsAsString:self.game.previouslyChosenCards], [CardMatchingGame mismatchPenalty]];
         }
     } else {
         // No matching event occured, simply display the currently selected cards

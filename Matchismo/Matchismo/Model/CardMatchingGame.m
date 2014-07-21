@@ -7,6 +7,7 @@
 //
 
 #import "CardMatchingGame.h"
+#import "MatchCard.h"
 
 @interface CardMatchingGame()
 @property (nonatomic, readwrite) NSInteger score;
@@ -89,7 +90,10 @@ static const int COST_TO_CHOOSE = 1;
                 }
             }
             
-            self.score -= COST_TO_CHOOSE;
+            if (![card isKindOfClass:[MatchCard class]]) {
+                // Only penalize for a reveal if the cards aren't revealed to begin with
+                self.score -= COST_TO_CHOOSE;
+            }
             card.chosen = YES;
         }
     }
