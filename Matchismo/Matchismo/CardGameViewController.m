@@ -51,31 +51,41 @@
     for (UIButton *cardButton in self.cardButtons) {
         int cardIndex = [self.cardButtons indexOfObject:cardButton];
         Card *card = [self.game cardAtIndex:cardIndex];
-        [cardButton setTitle:[self titleForCard:card] forState:UIControlStateNormal];
-        [cardButton setBackgroundImage:[self backgroundImageForCard:card] forState:UIControlStateNormal];
+        [cardButton setAttributedTitle:[self titleForCard:card]
+                              forState:UIControlStateNormal];
+        [cardButton setBackgroundImage:[self backgroundImageForCard:card]
+                              forState:UIControlStateNormal];
         cardButton.enabled = !card.isMatched;
     }
     self.scoreLabel.text = [NSString stringWithFormat:@"Score: %d", self.game.score];
-    self.lastMatchResultLabel.text = [self generateResultText];
+    self.lastMatchResultLabel.attributedText = [self generateResultText];
 }
 
-- (NSString *)cardContentsAsString:(NSArray *)cards {
+- (NSAttributedString *)cardContentsAsString:(NSArray *)cards {
     NSString *resultString = [[NSString alloc] init];
     for (Card *card in cards) {
         resultString = [resultString stringByAppendingString:[NSString stringWithFormat:@"%@ ", card.contents]];
     }
-    return resultString;
+    return [[NSAttributedString alloc] initWithString:resultString];
 }
 
-- (NSString *)generateResultText {
+- (NSAttributedString *)generateResultText {
     NSArray *chosenCards = self.game.previouslyChosenCards;
     if ([chosenCards count] == self.game.matchCount) {
         // A matching event occured, display the results
         int pointValue = self.game.lastScore;
         if (pointValue > 0) {
-            return [NSString stringWithFormat:@"Matched %@for %d %@!", [self cardContentsAsString:self.game.previouslyChosenCards], pointValue, pointValue == 1 ? @"point" : @"points"];
+            NSMutableAttributedString *result = [[NSMutableAttributedString alloc] initWithString:@"Matched "];
+            NSAttributedString *cardContents = [self cardContentsAsString:self.game.previouslyChosenCards];
+            [result appendAttributedString:cardContents];
+            [result appendAttributedString:[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@" for %d points", pointValue]]];
+            return result;
         } else {
-            return [NSString stringWithFormat:@"%@don't match! %d point penalty!", [self cardContentsAsString:self.game.previouslyChosenCards], pointValue];
+            NSMutableAttributedString *result = [[NSMutableAttributedString alloc] init];
+            NSAttributedString *cardContents = [self cardContentsAsString:self.game.previouslyChosenCards];
+            [result appendAttributedString:cardContents];
+            [result appendAttributedString:[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@" don't match! %d point penalty", pointValue]]];
+            return result;
         }
     } else {
         // No matching event occured, simply display the currently selected cards
@@ -83,8 +93,9 @@
     }
 }
 
-- (NSString *)titleForCard:(Card *)card {
-    return card.isChosen ? card.contents : @"";
+- (NSAttributedString *)titleForCard:(Card *)card {
+    NSAttributedString *title = [[NSAttributedString alloc] initWithString:card.isChosen ? card.contents : @""];
+    return title;
 }
 
 - (UIImage *)backgroundImageForCard:(Card *)card {

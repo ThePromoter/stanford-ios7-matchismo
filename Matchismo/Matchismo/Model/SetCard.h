@@ -8,14 +8,16 @@
 
 #import "Card.h"
 
-@interface MatchCard : Card
+@interface SetCard : Card
 
 @property (strong, nonatomic) NSString *symbol;
-@property (strong, nonatomic) NSNumber *opacity;
+@property (strong, nonatomic) NSString *shading;
 @property (strong, nonatomic) NSString *color;
+@property (nonatomic) NSInteger number;
 
 + (NSArray *)validSymbols;
-+ (NSArray *)validOpacities;
++ (NSArray *)validShades;
 + (NSArray *)validColors;
++ (NSInteger)maxNumber;
 
 @end
