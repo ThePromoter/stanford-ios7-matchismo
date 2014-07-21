@@ -17,11 +17,9 @@
 - (void)chooseCardAtIndex:(NSUInteger)index;
 - (Card *)cardAtIndex:(NSUInteger)index;
 
-+ (NSUInteger)mismatchPenalty;
-+ (NSUInteger)matchBonus;
-
-@property (nonatomic, readonly) NSInteger score;
-@property (nonatomic, readonly) NSMutableArray *previouslyChosenCards;
 @property (nonatomic) NSInteger matchCount;
+@property (nonatomic, readonly) NSInteger score;
+@property (nonatomic, readonly) NSArray *previouslyChosenCards;
+@property (nonatomic, readonly) NSInteger lastScore;
 
 @end
