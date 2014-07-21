@@ -8,10 +8,12 @@
 
 #import "CardGameViewController.h"
 #import "Model/CardMatchingGame.h"
+#import "HistoryViewController.h"
 
 @interface CardGameViewController ()
 @property (strong, nonatomic) Deck *deck;
 @property (strong, nonatomic) CardMatchingGame *game;
+@property (strong, nonatomic) NSMutableArray *resultItems;
 @property (weak, nonatomic) IBOutlet UILabel *scoreLabel;
 @property (weak, nonatomic) IBOutlet UILabel *lastMatchResultLabel;
 @property (strong, nonatomic) IBOutletCollection(UIButton) NSArray *cardButtons;
@@ -34,6 +36,13 @@
 // abstract
 - (Deck *)createDeck {
     return nil;
+}
+
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    if ([segue.identifier isEqualToString:@"ShowHistory"]) {
+        HistoryViewController *historyVS = segue.destinationViewController;
+        historyVS.historyItems = self.resultItems;
+    }
 }
 
 - (IBAction)startNewGame:(UIButton *)sender {
@@ -71,6 +80,7 @@
 
 - (NSAttributedString *)generateResultText {
     NSArray *chosenCards = self.game.previouslyChosenCards;
+    NSAttributedString *resultText = [[NSAttributedString alloc] init];
     if ([chosenCards count] == self.game.matchCount) {
         // A matching event occured, display the results
         int pointValue = self.game.lastScore;
@@ -79,18 +89,22 @@
             NSAttributedString *cardContents = [self cardContentsAsString:self.game.previouslyChosenCards];
             [result appendAttributedString:cardContents];
             [result appendAttributedString:[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@" for %d points", pointValue]]];
-            return result;
+            resultText = result;
         } else {
             NSMutableAttributedString *result = [[NSMutableAttributedString alloc] init];
             NSAttributedString *cardContents = [self cardContentsAsString:self.game.previouslyChosenCards];
             [result appendAttributedString:cardContents];
             [result appendAttributedString:[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@" don't match! %d point penalty", pointValue]]];
-            return result;
+            resultText = result;
         }
+        
+        [self.resultItems addObject:resultText];
     } else {
         // No matching event occured, simply display the currently selected cards
-        return [self cardContentsAsString:self.game.previouslyChosenCards];
+        resultText = [self cardContentsAsString:self.game.previouslyChosenCards];
     }
+    
+    return resultText;
 }
 
 - (NSAttributedString *)titleForCard:(Card *)card {
@@ -100,6 +114,11 @@
 
 - (UIImage *)backgroundImageForCard:(Card *)card {
     return [UIImage imageNamed:card.isChosen ? @"cardfront" : @"cardback"];
+}
+
+- (NSMutableArray *)resultItems {
+    if (!_resultItems) _resultItems = [[NSMutableArray alloc] init];
+    return _resultItems;
 }
 
 @end
